@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package aegis.inference.v1;
+
+option java_package = "com.aegis.contracts.inference.v1";
+option java_multiple_files = true;
+
+service InferenceService {
+  // Unary inference for single frames
+  rpc Infer(InferenceRequest) returns (InferenceResponse);
+
+  // Bidirectional streaming for continuous capture
+  rpc StreamInfer(stream InferenceRequest) returns (stream InferenceResponse);
+}
+
+message InferenceRequest {
+  string device_id = 1;
+  string session_id = 2;
+  bytes frame_data = 3; // JPEG encoded frame
+  int32 frame_width = 4;
+  int32 frame_height = 5;
+  repeated float ar_anchor_pose = 6;  // ARCore pose matrix
+  int64 timestamp_ms = 7;
+}
+
+message InferenceResponse {
+  string request_id = 1;
+  repeated Detection detections = 2;
+  float inference_latency_ms = 3;
+  string model_version = 4;
+}
+
+message Detection {
+  string class_label = 1;
+  float confidence = 2;
+  BoundingBox box = 3;
+}
+
+message BoundingBox {
+  float x_min = 1;
+  float y_min = 2;
+  float x_max = 3;
+  float y_max = 4;
+}
